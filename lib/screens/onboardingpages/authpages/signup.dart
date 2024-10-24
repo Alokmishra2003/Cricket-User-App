@@ -38,7 +38,7 @@ class _SignUpPageState extends State<SignUpPage> {
               const SizedBox(height: 10),
               _buildInputField(screenWidth, 'Phone'),
               const SizedBox(height: 10),
-              _buildInputField(screenWidth, 'Password', obscureText: true),
+             // _buildInputField(screenWidth, 'Password', obscureText: true),
               const SizedBox(height: 10),
               Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 32.0),

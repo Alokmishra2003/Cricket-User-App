@@ -36,21 +36,21 @@ class SignInPage extends StatelessWidget {
             _buildInputContainer(
               const TextField(
                 decoration: InputDecoration(
-                  hintText: 'Phone/Email',
+                  hintText: 'Phone',
                   border: InputBorder.none,
                 ),
               ),
             ),
             const SizedBox(height: 20),
-            _buildInputContainer(
-              const TextField(
-                obscureText: true,
-                decoration: InputDecoration(
-                  hintText: 'Password',
-                  border: InputBorder.none,
-                ),
-              ),
-            ),
+            // _buildInputContainer(
+            //   const TextField(
+            //     obscureText: true,
+            //     decoration: InputDecoration(
+            //       hintText: 'Password',
+            //       border: InputBorder.none,
+            //     ),
+            //   ),
+            // ),
             const SizedBox(height: 30),
             // Updated ElevatedButton with LinearGradient
             Container(
@@ -90,16 +90,16 @@ class SignInPage extends StatelessWidget {
               ),
             ),
             const SizedBox(height: 20),
-            const Text(
-              'Forgot your password?',
-              style: TextStyle(
-                fontSize: 16,
-                color: Colors.black,
-              ),
-            ),
+            // const Text(
+            //   'Forgot your password?',
+            //   style: TextStyle(
+            //     fontSize: 16,
+            //     color: Colors.black,
+            //   ),
+            // ),
             SizedBox(height: MediaQuery.of(context).size.height * 0.28),
             Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 72.0),
+              padding: const EdgeInsets.symmetric(horizontal: 90.0),
               child: Row(
                 children: [
                   const Text(
