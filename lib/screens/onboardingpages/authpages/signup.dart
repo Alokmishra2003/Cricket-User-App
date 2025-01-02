@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:coachui/screens/onboardingpages/authpages/otp.dart';
-import 'package:coachui/screens/onboardingpages/authpages/signin.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 
 class SignUpPage extends StatefulWidget {
   const SignUpPage({Key? key}) : super(key: key);
@@ -11,6 +11,8 @@ class SignUpPage extends StatefulWidget {
 
 class _SignUpPageState extends State<SignUpPage> {
   bool? _agreeToTerms = false;
+  final TextEditingController _phoneController = TextEditingController();
+  final FirebaseAuth _auth = FirebaseAuth.instance;
 
   @override
   Widget build(BuildContext context) {
@@ -31,14 +33,7 @@ class _SignUpPageState extends State<SignUpPage> {
                 ),
               ),
               const SizedBox(height: 30),
-              // Repeated input container code can be refactored into a method
-              _buildInputField(screenWidth, 'Full Name'),
-              const SizedBox(height: 10),
-              _buildInputField(screenWidth, 'Email'),
-              const SizedBox(height: 10),
-              _buildInputField(screenWidth, 'Phone'),
-              const SizedBox(height: 10),
-             // _buildInputField(screenWidth, 'Password', obscureText: true),
+              _buildInputField(screenWidth, 'Phone', controller: _phoneController),
               const SizedBox(height: 10),
               Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 32.0),
@@ -58,13 +53,12 @@ class _SignUpPageState extends State<SignUpPage> {
                 ),
               ),
               const SizedBox(height: 20),
-              // Updated ElevatedButton with LinearGradient
               Container(
                 decoration: BoxDecoration(
                   gradient: LinearGradient(
                     colors: [
-                      Color(0xFF7850BF), // Start color of the gradient
-                      Color(0xFF512DA8), // End color of the gradient
+                      Color(0xFF7850BF),
+                      Color(0xFF512DA8),
                     ],
                     begin: Alignment.topLeft,
                     end: Alignment.bottomRight,
@@ -72,20 +66,48 @@ class _SignUpPageState extends State<SignUpPage> {
                   borderRadius: BorderRadius.circular(20),
                 ),
                 child: ElevatedButton(
-                  onPressed: _agreeToTerms == true // Only enabled if terms are agreed
-                      ? () {
-                          // Navigate to OTPPage from SignUpPage
-                          Navigator.push(
-                            context,
-                            MaterialPageRoute(builder: (context) => const OTPPage(fromSignIn: false)),
-                          );
+                  onPressed: _agreeToTerms == true
+                      ? () async {
+                          try {
+                            await _auth.verifyPhoneNumber(
+                              phoneNumber: _phoneController.text,
+                              verificationCompleted: (PhoneAuthCredential credential) async {
+                                await _auth.signInWithCredential(credential);
+                                ScaffoldMessenger.of(context).showSnackBar(
+                                  const SnackBar(content: Text('User created successfully')),
+                                );
+                              },
+                              verificationFailed: (FirebaseAuthException e) {
+                                ScaffoldMessenger.of(context).showSnackBar(
+                                  SnackBar(content: Text('Verification failed: ${e.message}')),
+                                );
+                              },
+                              codeSent: (String verificationId, int? resendToken) {
+                                Navigator.push(
+                                  context,
+                                  MaterialPageRoute(
+                                    builder: (context) => OTPPage(
+                                      fromSignIn: false,
+                                      phoneNumber: _phoneController.text,
+                                      verificationId: verificationId,
+                                    ),
+                                  ),
+                                );
+                              },
+                              codeAutoRetrievalTimeout: (String verificationId) {},
+                            );
+                          } catch (e) {
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              SnackBar(content: Text('Error: ${e.toString()}')),
+                            );
+                          }
                         }
-                      : null, // Disable button if terms are not agreed
+                      : null,
                   style: ElevatedButton.styleFrom(
-                    primary: Colors.transparent, // Set primary color to transparent
+                    primary: Colors.transparent,
                     padding: const EdgeInsets.symmetric(vertical: 15, horizontal: 100),
                     shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(20), // Match the button border radius
+                      borderRadius: BorderRadius.circular(20),
                     ),
                   ),
                   child: const Text(
@@ -104,8 +126,7 @@ class _SignUpPageState extends State<SignUpPage> {
     );
   }
 
-  // Method to build input fields to avoid repetition
-  Widget _buildInputField(double screenWidth, String hintText, {bool obscureText = false}) {
+  Widget _buildInputField(double screenWidth, String hintText, {TextEditingController? controller}) {
     return Container(
       width: screenWidth * 0.8,
       padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 20),
@@ -114,7 +135,7 @@ class _SignUpPageState extends State<SignUpPage> {
         borderRadius: BorderRadius.circular(20),
       ),
       child: TextField(
-        obscureText: obscureText,
+        controller: controller,
         decoration: InputDecoration(
           hintText: hintText,
           border: InputBorder.none,

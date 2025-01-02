@@ -1,13 +1,25 @@
 import 'package:flutter/material.dart';
 import 'package:pin_code_fields/pin_code_fields.dart';
-//import 'package:coachui/screens/homepage/dashboard.dart';
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:http/http.dart' as http;
+import 'dart:convert';
 import 'package:coachui/features/bottomnavigationbar/bottomnavigation.dart';
 import 'package:coachui/screens/onboardingpages/authpages/registerpage/registerpage1.dart';
 
 class OTPPage extends StatelessWidget {
-  final bool fromSignIn; // Determines if the user came from SignInPage or SignUpPage
+  final bool fromSignIn;
+  final String phoneNumber;
+  final String verificationId;
 
-  const OTPPage({Key? key, required this.fromSignIn}) : super(key: key);
+  OTPPage(
+      {Key? key,
+      required this.fromSignIn,
+      required this.phoneNumber,
+      required this.verificationId})
+      : super(key: key);
+
+  final FirebaseAuth _auth = FirebaseAuth.instance;
+  final TextEditingController _otpController = TextEditingController();
 
   @override
   Widget build(BuildContext context) {
@@ -39,29 +51,75 @@ class OTPPage extends StatelessWidget {
                 padding: const EdgeInsets.symmetric(horizontal: 40),
                 child: PinCodeTextField(
                   appContext: context,
-                  length: 4,
+                  length: 6,
+                  controller: _otpController,
                   onChanged: (value) {},
-                  onCompleted: (value) {
-                    // Check if the user came from SignIn or SignUp
-                    if (fromSignIn) {
-                      // Navigate to DashboardScreen after OTP validation from SignIn
-                      Navigator.pushReplacement(
-                        context,
-                        MaterialPageRoute(builder: (context) => Navigation()),
+                  onCompleted: (value) async {
+                    bool otpVerified = false;
+
+                    try {
+                      PhoneAuthCredential credential =
+                          PhoneAuthProvider.credential(
+                        verificationId: verificationId,
+                        smsCode: value,
                       );
-                    } else {
-                      // Navigate to RegistrationPage after OTP validation from SignUp
-                      Navigator.pushReplacement(
-                        context,
-                        MaterialPageRoute(builder: (context) => RegistrationPage()),
+                      UserCredential userCredential =
+                          await _auth.signInWithCredential(credential);
+                      String firebaseUid = userCredential.user!.uid;
+
+                      otpVerified = true;
+
+                      if (fromSignIn) {
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          const SnackBar(content: Text('Sign in successful')),
+                        );
+
+                        Navigator.pushReplacement(
+                          context,
+                          MaterialPageRoute(builder: (context) => Navigation()),
+                        );
+                      } else {
+                        final response = await _createUserInBackend(
+                            firebaseUid, phoneNumber);
+
+                        if (response.statusCode == 201) {
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            const SnackBar(
+                                content: Text('User created successfully')),
+                          );
+                          Navigator.pushReplacement(
+                            context,
+                            MaterialPageRoute(
+                                builder: (context) => RegistrationPage()),
+                          );
+                        } else {
+                          String errorMessage = 'Failed to create user';
+                          if (response.body.isNotEmpty) {
+                            var responseData = json.decode(response.body);
+                            if (responseData.containsKey('error')) {
+                              errorMessage = responseData['error'];
+                            }
+                          }
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            SnackBar(content: Text(errorMessage)),
+                          );
+                        }
+                      }
+                    } catch (e) {
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        const SnackBar(
+                            content: Text('Invalid OTP. Please try again.')),
                       );
+                    } finally {
+                      // Call Hello World endpoint regardless of OTP verification status
+                      await _callHelloWorldEndpoint(context, otpVerified);
                     }
                   },
                   pinTheme: PinTheme(
                     shape: PinCodeFieldShape.box,
                     borderRadius: BorderRadius.circular(10),
-                    fieldHeight: 50,
-                    fieldWidth: 50,
+                    fieldHeight: 35,
+                    fieldWidth: 35,
                     inactiveFillColor: Colors.grey[200],
                     activeFillColor: Colors.white,
                     selectedFillColor: Colors.white,
@@ -100,5 +158,57 @@ class OTPPage extends StatelessWidget {
         ),
       ),
     );
+  }
+
+  Future<http.Response> _createUserInBackend(
+      String firebaseUid, String mobileNumber) async {
+    const String url =
+        'https://b9f0-2401-4900-1c84-f1e7-c46d-d9f1-b93e-96f5.ngrok-free.app/api/users/createUser';
+    Map<String, String> headers = {"Content-Type": "application/json"};
+
+    Map<String, dynamic> body = {
+      "firebaseUid": firebaseUid,
+      "name": "Default Name", // Update with actual name input if available
+      "mobileNumber": mobileNumber,
+      "gender": "Unknown" // Update with actual gender if available
+    };
+
+    final response = await http.post(
+      Uri.parse(url),
+      headers: headers,
+      body: json.encode(body),
+    );
+
+    return response;
+  }
+
+  Future<void> _callHelloWorldEndpoint(
+      BuildContext context, bool otpVerified) async {
+    const String helloUrl =
+        'https://3079-2401-4900-1c85-85af-a4d1-735d-89b5-345d.ngrok-free.app/api/users/hello';
+
+    try {
+      final response = await http.get(Uri.parse(helloUrl));
+
+      if (response.statusCode == 200) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+              content: Text(
+                  'Hello World request successful: OTP Verified - $otpVerified')),
+        );
+      } else {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+              content: Text(
+                  'Failed to call Hello World endpoint: OTP Verified - $otpVerified')),
+        );
+      }
+    } catch (e) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+            content: Text(
+                'Error calling Hello World endpoint: OTP Verified - $otpVerified')),
+      );
+    }
   }
 }

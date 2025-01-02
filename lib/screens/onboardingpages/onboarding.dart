@@ -38,7 +38,7 @@ class OnboardingPage extends StatelessWidget {
         'buttonAction': () {
           Navigator.push(
             context,
-            MaterialPageRoute(builder: (context) => const SignInPage()),
+            MaterialPageRoute(builder: (context) => SignInPage()),
           );
         }
       },
@@ -130,7 +130,7 @@ class OnboardingPage extends StatelessWidget {
                                   onPressed: () {
                                     Navigator.push(
                                       context,
-                                      MaterialPageRoute(builder: (context) => const SignInPage()),
+                                      MaterialPageRoute(builder: (context) =>  SignInPage()),
                                     ); // Navigate to the SignIn page
                                   },
                                   child: Padding(

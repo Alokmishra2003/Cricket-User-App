@@ -12,7 +12,7 @@ class _ProfilePageState extends State<ProfilePage> {
   String name = "John Doe";
   String weight = "70 kg";
   String dob = "01/01/1990";
-  String email = "john.doe@example.com";
+  String height = "175 cm";
 
   @override
   Widget build(BuildContext context) {
@@ -148,7 +148,7 @@ class _ProfilePageState extends State<ProfilePage> {
                         name: name,
                         weight: weight,
                         dob: dob,
-                        email: email,
+                        height: height,
                       ),
                     ),
                   );
@@ -158,12 +158,12 @@ class _ProfilePageState extends State<ProfilePage> {
                       name = updatedData['name'];
                       weight = updatedData['weight'];
                       dob = updatedData['dob'];
-                      email = updatedData['email'];
+                      height = updatedData['email'];
                     });
                   }
                 },
                 child: Text(
-                  'My Account',
+                  'Edit Account Details',
                   style: TextStyle(color: Colors.white, fontSize: 16),
                 ),
               ),

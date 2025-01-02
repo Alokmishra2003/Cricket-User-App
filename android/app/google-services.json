@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "666303524211",
+    "project_id": "cricuser-16820",
+    "storage_bucket": "cricuser-16820.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:666303524211:android:3b8ccf49e4d074ea8e6906",
+        "android_client_info": {
+          "package_name": "com.example.coachui"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDM3PvHTY6Dc75ccv4Iv4cKUlkK1odh6ZI"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

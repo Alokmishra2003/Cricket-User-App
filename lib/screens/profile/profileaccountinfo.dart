@@ -4,13 +4,13 @@ class ProfileScreen extends StatefulWidget {
   final String name;
   final String weight;
   final String dob;
-  final String email;
+  final String height;
 
   ProfileScreen({
     required this.name,
     required this.weight,
     required this.dob,
-    required this.email,
+    required this.height,
   });
 
   @override
@@ -21,7 +21,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
   late TextEditingController _nameController;
   late TextEditingController _weightController;
   late TextEditingController _dobController;
-  late TextEditingController _emailController;
+  late TextEditingController _heightController;
 
   @override
   void initState() {
@@ -29,7 +29,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
     _nameController = TextEditingController(text: widget.name);
     _weightController = TextEditingController(text: widget.weight);
     _dobController = TextEditingController(text: widget.dob);
-    _emailController = TextEditingController(text: widget.email);
+    _heightController = TextEditingController(text: widget.height);
   }
 
   void _saveProfile() {
@@ -38,13 +38,13 @@ class _ProfileScreenState extends State<ProfileScreen> {
     print("Name: ${_nameController.text}");
     print("Weight: ${_weightController.text}");
     print("Date of Birth: ${_dobController.text}");
-    print("Email: ${_emailController.text}");
+    print("Email: ${_heightController.text}");
     
     Navigator.pop(context, {
       'name': _nameController.text,
       'weight': _weightController.text,
       'dob': _dobController.text,
-      'email': _emailController.text,
+      'email': _heightController.text,
     });
   }
 
@@ -113,7 +113,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
             _buildProfileField("Name", _nameController),
             _buildProfileField("Weight", _weightController),
             _buildProfileField("Date of Birth", _dobController),
-            _buildProfileField("Email", _emailController),
+            _buildProfileField("Height", _heightController),
           ],
         ),
       ),

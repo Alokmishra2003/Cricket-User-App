@@ -1,4 +1,4 @@
-package com.example.coachui
+package com.yourdomain.coachui
 
 import io.flutter.embedding.android.FlutterActivity
 

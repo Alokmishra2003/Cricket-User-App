@@ -1,5 +1,8 @@
 plugins {
     id "com.android.application"
+    // START: FlutterFire Configuration
+    id 'com.google.gms.google-services'
+    // END: FlutterFire Configuration
     id "kotlin-android"
     id "dev.flutter.flutter-gradle-plugin"
 }
@@ -23,8 +26,8 @@ if (flutterVersionName == null) {
 }
 
 android {
-    namespace "com.example.coachui"
-    compileSdkVersion flutter.compileSdkVersion
+    namespace "com.yourdomain.coachui"
+    compileSdkVersion 34 // Updated to version 34
     ndkVersion flutter.ndkVersion
 
     compileOptions {
@@ -41,10 +44,9 @@ android {
     }
 
     defaultConfig {
-        // TODO: Specify your own unique Application ID (https://developer.android.com/studio/build/application-id.html).
+        // Specify your own unique Application ID.
         applicationId "com.example.coachui"
-        // You can update the following values to match your application needs.
-        // For more information, see: https://docs.flutter.dev/deployment/android#reviewing-the-gradle-build-configuration.
+        // Update these values to match your application needs.
         minSdkVersion flutter.minSdkVersion
         targetSdkVersion flutter.targetSdkVersion
         versionCode flutterVersionCode.toInteger()
@@ -53,8 +55,7 @@ android {
 
     buildTypes {
         release {
-            // TODO: Add your own signing config for the release build.
-            // Signing with the debug keys for now, so `flutter run --release` works.
+            // Signing with the debug keys for now, so flutter run --release works.
             signingConfig signingConfigs.debug
         }
     }
@@ -64,4 +65,12 @@ flutter {
     source '../..'
 }
 
-dependencies {}
+dependencies {
+    // Firebase and Google Play Services dependencies
+    implementation platform('com.google.firebase:firebase-bom:32.1.0') // Update this to the latest version
+    implementation 'com.google.firebase:firebase-auth' // Firebase Authentication
+    implementation 'com.google.android.gms:play-services-auth:20.7.0' // Google Sign-In services
+}
+
+// Apply the Google Services plugin for Google Sign-In and Firebase
+apply plugin: 'com.google.gms.google-services'
