@@ -15,6 +15,8 @@ class _AddTransactionScreenState extends State<AddTransactionScreen> {
   TextEditingController phoneController = TextEditingController();
   TextEditingController amountController = TextEditingController();
   TextEditingController remarkController = TextEditingController();
+  TextEditingController totalFeeController = TextEditingController(text: "300000");
+  TextEditingController balanceController = TextEditingController();
 
   Future<void> _selectDate(BuildContext context) async {
     final DateTime? picked = await showDatePicker(
@@ -30,12 +32,26 @@ class _AddTransactionScreenState extends State<AddTransactionScreen> {
     }
   }
 
+  void _updateBalance() {
+    if (amountController.text.isNotEmpty) {
+      int totalFee = int.tryParse(totalFeeController.text) ?? 0;
+      int amountPaid = int.tryParse(amountController.text) ?? 0;
+      int balance = totalFee - amountPaid;
+      setState(() {
+        balanceController.text = balance.toString();
+      });
+    } else {
+      setState(() {
+        balanceController.text = totalFeeController.text;
+      });
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
         title: const Text("Payments"),
-        //backgroundColor: Colors.purple,
       ),
       body: SingleChildScrollView(
         child: Padding(
@@ -155,6 +171,61 @@ class _AddTransactionScreenState extends State<AddTransactionScreen> {
                     border: OutlineInputBorder(),
                   ),
                   keyboardType: TextInputType.number,
+                  onChanged: (value) {
+                    _updateBalance();
+                  },
+                ),
+                const SizedBox(height: 16),
+                Row(
+                  children: [
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          const Text(
+                            "Total Fee",
+                            style: TextStyle(
+                              fontSize: 16,
+                              fontWeight: FontWeight.bold,
+                              color: Colors.black,
+                            ),
+                          ),
+                          const SizedBox(height: 8),
+                          TextField(
+                            controller: totalFeeController,
+                            readOnly: true,
+                            decoration: const InputDecoration(
+                              border: OutlineInputBorder(),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                    const SizedBox(width: 16),
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          const Text(
+                            "Balance",
+                            style: TextStyle(
+                              fontSize: 16,
+                              fontWeight: FontWeight.bold,
+                              color: Colors.black,
+                            ),
+                          ),
+                          const SizedBox(height: 8),
+                          TextField(
+                            controller: balanceController,
+                            readOnly: true,
+                            decoration: const InputDecoration(
+                              border: OutlineInputBorder(),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ],
                 ),
                 const SizedBox(height: 16),
                 const Text(
@@ -209,13 +280,14 @@ class _AddTransactionScreenState extends State<AddTransactionScreen> {
                               phoneNumber: phoneController.text,
                               amount: amountController.text,
                               remark: remarkController.text,
+                              balance: balanceController.text, // Pass the balance
                             ),
                           ),
                         );
                       }
                     },
-                    child: Padding(
-                      padding: const EdgeInsets.symmetric(vertical: 16),
+                    child: const Padding(
+                      padding: EdgeInsets.symmetric(vertical: 16),
                       child: Center(
                         child: Text(
                           'Done',

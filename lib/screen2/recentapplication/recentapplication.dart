@@ -2,7 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:coachui/features/searchbar/searchbar1.dart';
 import 'package:coachui/features/filter/filter .dart';
 import 'package:coachui/features/filter/applications.dart';
-
+//import 'package:coachui/screen2/recentapplication/recentapplicationdat.dart';
+import 'package:coachui/screen2/recentapplication/recentapplicationeit1.dart';
 class RecentApplicationPage extends StatefulWidget {
   @override
   _RecentApplicationPageState createState() => _RecentApplicationPageState();
@@ -64,10 +65,15 @@ class _RecentApplicationPageState extends State<RecentApplicationPage> {
               width: MediaQuery.of(context).size.width * 0.8, // 80% of screen width
               child: ElevatedButton(
                 onPressed: () {
-                  // Define button action here
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) => RecentApplicationEdit1(), // Placeholder for your specified page
+                    ),
+                  );
                 },
                 style: ElevatedButton.styleFrom(
-                  primary: Colors.purple, // Button color
+                  primary: Color(0xFF7850BF), // Button color
                   padding: EdgeInsets.symmetric(horizontal: 16.0, vertical: 12.0),
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(20), // Rounded corners
@@ -88,3 +94,4 @@ class _RecentApplicationPageState extends State<RecentApplicationPage> {
     );
   }
 }
+

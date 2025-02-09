@@ -2,7 +2,7 @@
     package="com.yourdomain.coachui">
 
     <application
-        android:label="coachui"
+        android:label="CricGuru"
         android:name="${applicationName}"
         android:icon="@mipmap/ic_launcher">
 

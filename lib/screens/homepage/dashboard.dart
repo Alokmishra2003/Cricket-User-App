@@ -5,7 +5,7 @@ import 'package:percent_indicator/circular_percent_indicator.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:coachui/apifolder/getuser.dart'; // Import the service to get user data
 import 'package:coachui/apifolder/markattendance.dart'; // Import the service to mark attendance
-
+import 'package:coachui/screens/notify/notification.dart';
 class DashboardScreen extends StatefulWidget {
   @override
   _DashboardScreenState createState() => _DashboardScreenState();
@@ -108,10 +108,20 @@ class _DashboardScreenState extends State<DashboardScreen> {
                     ),
                   ),
                   // Notification icon using Image.asset
-                  Image.asset(
-                    'assets/u4.png',
-                    width: 40,
-                    height: 40,
+                  GestureDetector(
+                    onTap: () {
+                       Navigator.push(
+                       context,
+                       MaterialPageRoute(
+                       builder: (context) => NotificationScreen(), // Replace with your NotificationPage
+                       ),
+                    );
+                    },
+                    child: Image.asset(
+                      'assets/u4.png',
+                      width: 40,
+                      height: 40,
+                    ),
                   ),
                 ],
               ),

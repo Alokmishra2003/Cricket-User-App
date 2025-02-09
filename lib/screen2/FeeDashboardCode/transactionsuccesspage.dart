@@ -5,14 +5,16 @@ import 'package:printing/printing.dart';
 import 'dart:io';
 import 'package:path_provider/path_provider.dart';
 import 'package:permission_handler/permission_handler.dart';
+import 'package:flutter/services.dart';
 
 class SuccessScreen extends StatelessWidget {
   final String studentName;
   final String batchName;
   final String dateOfTransaction;
   final String phoneNumber;
-  final String amount;
+  final String amount; // Paid Amount
   final String remark;
+  final String balance; // Newly Added Balance Amount
 
   const SuccessScreen({
     Key? key,
@@ -22,11 +24,17 @@ class SuccessScreen extends StatelessWidget {
     required this.phoneNumber,
     required this.amount,
     required this.remark,
+    required this.balance,
   }) : super(key: key);
 
-  // Method to generate the PDF document
+  // Generate PDF
   Future<pw.Document> _generatePdf() async {
     final pw.Document pdf = pw.Document();
+    final ByteData imageData = await rootBundle.load('assets/u15.png');
+    final Uint8List imageBytes = imageData.buffer.asUint8List();
+    // Load the custom font
+    final ByteData fontData = await rootBundle.load('assets/Roboto/Roboto-Italic-VariableFont_wdth,wght.ttf');
+    final pw.Font customFont = pw.Font.ttf(fontData);
 
     pdf.addPage(
       pw.Page(
@@ -36,27 +44,70 @@ class SuccessScreen extends StatelessWidget {
           child: pw.Column(
             crossAxisAlignment: pw.CrossAxisAlignment.start,
             children: [
-              pw.Text(
-                'Transaction Receipt',
-                style: pw.TextStyle(
-                  fontSize: 24,
-                  fontWeight: pw.FontWeight.bold,
+              pw.Center(
+                child: pw.Column(
+                  children: [
+                    pw.Text(
+                      'Invoice',
+                      style: pw.TextStyle(
+                        fontSize: 28,
+                        fontWeight: pw.FontWeight.bold,
+                      ),
+                    ),
+                    pw.Text(
+                      'Your Organization',
+                      style: pw.TextStyle(
+                        fontSize: 18,
+                        fontWeight: pw.FontWeight.bold,
+                      ),
+                    ),
+                    pw.SizedBox(height: 8),
+                    pw.Image(
+                    pw.MemoryImage(imageBytes), // Add the image here
+                    width: 100, // Adjust width as needed
+                    height: 100, // Adjust height as needed
+                  ),
+                  ],
                 ),
               ),
-              pw.SizedBox(height: 16),
+              pw.SizedBox(height: 20),
               pw.Divider(),
-              pw.SizedBox(height: 16),
-              pw.Text('Student Name: $studentName',
-                  style: pw.TextStyle(fontSize: 18)),
-              pw.Text('Batch Name: $batchName',
-                  style: pw.TextStyle(fontSize: 18)),
-              pw.Text('Date of Transaction: $dateOfTransaction',
-                  style: pw.TextStyle(fontSize: 18)),
-              pw.Text('Phone Number: $phoneNumber',
-                  style: pw.TextStyle(fontSize: 18)),
-              pw.Text('Amount: ₹$amount',
-                  style: pw.TextStyle(fontSize: 18, color: PdfColors.green)),
-              pw.Text('Remark: $remark', style: pw.TextStyle(fontSize: 18)),
+              pw.SizedBox(height: 20),
+              pw.Table(
+                border: pw.TableBorder.all(),
+                children: [
+                _buildTableRow('Student Name', studentName, customFont),
+                _buildTableRow('Batch Name', batchName, customFont),
+                _buildTableRow('Date of Transaction', dateOfTransaction, customFont),
+                _buildTableRow('Phone Number', phoneNumber, customFont),
+                _buildTableRow('Paid Amount', '₹$amount', customFont),
+                _buildTableRow('Balance Amount', '₹$balance', customFont), // New Row
+                _buildTableRow('Remark', remark, customFont),
+              ],
+              ),
+              pw.SizedBox(height: 40),
+              pw.Align(
+                alignment: pw.Alignment.bottomRight,
+                child: pw.Column(
+                  children: [
+                    pw.Text(
+                      'Authorized Signature',
+                      style: pw.TextStyle(
+                        fontSize: 14,
+                        fontStyle: pw.FontStyle.italic,
+                      ),
+                    ),
+                    pw.SizedBox(height: 8),
+                    pw.Container(
+                      width: 120,
+                      height: 40,
+                      decoration: pw.BoxDecoration(
+                        border: pw.Border.all(),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
             ],
           ),
         ),
@@ -66,13 +117,31 @@ class SuccessScreen extends StatelessWidget {
     return pdf;
   }
 
-  // Method to save the PDF to a file in the Downloads folder
+  pw.TableRow _buildTableRow(String parameter, String value, pw.Font font) {
+  return pw.TableRow(
+    children: [
+      pw.Padding(
+        padding: const pw.EdgeInsets.all(8.0),
+        child: pw.Text(parameter,
+            style: pw.TextStyle(fontWeight: pw.FontWeight.bold, font: font)),
+      ),
+      pw.Padding(
+        padding: const pw.EdgeInsets.all(8.0),
+        child: pw.Text(value, style: pw.TextStyle(font: font)),
+      ),
+    ],
+  );
+}
+
+
+  // Save PDF
   Future<String> _savePdfToDownloads(pw.Document pdf) async {
     final status = await Permission.storage.request();
 
     if (status.isGranted) {
       final Directory? directory = await getExternalStorageDirectory();
-      final String downloadsPath = '${directory?.parent.parent.parent.parent.path}/Download';
+      final String downloadsPath =
+          '${directory?.parent.parent.parent.parent.path}/Download';
       final String filePath = '$downloadsPath/transaction_receipt.pdf';
       final File file = File(filePath);
 
@@ -85,7 +154,7 @@ class SuccessScreen extends StatelessWidget {
     }
   }
 
-  // Method to handle the download action
+  // Download PDF
   Future<void> _downloadPdf(BuildContext context) async {
     try {
       final pdf = await _generatePdf();
@@ -101,7 +170,7 @@ class SuccessScreen extends StatelessWidget {
     }
   }
 
-  // Method to handle the share action
+  // Share PDF
   Future<void> _sharePdf() async {
     final pdf = await _generatePdf();
     await Printing.sharePdf(
@@ -132,7 +201,7 @@ class SuccessScreen extends StatelessWidget {
             ),
             const SizedBox(height: 16),
             Text(
-              "₹$amount",
+              "₹$amount", // Displays the entered amount
               style: const TextStyle(
                   fontSize: 32,
                   fontWeight: FontWeight.bold,
@@ -147,20 +216,24 @@ class SuccessScreen extends StatelessWidget {
             Row(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                IconButton(
-                  icon:
-                      const Icon(Icons.download, size: 40, color: Colors.purple),
-                  onPressed: () {
+                GestureDetector(
+                  onTap: () {
                     _downloadPdf(context);
                   },
+                  child: CircleAvatar(
+                    radius: 30,
+                    backgroundImage: AssetImage('assets/u9.png'),
+                  ),
                 ),
                 const SizedBox(width: 16),
-                IconButton(
-                  icon:
-                      const Icon(Icons.share, size: 40, color: Colors.purple),
-                  onPressed: () {
+                GestureDetector(
+                  onTap: () {
                     _sharePdf();
                   },
+                  child: CircleAvatar(
+                    radius: 30,
+                    backgroundImage: AssetImage('assets/u10.png'),
+                  ),
                 ),
               ],
             ),

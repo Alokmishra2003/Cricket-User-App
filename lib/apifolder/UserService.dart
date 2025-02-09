@@ -10,7 +10,7 @@ class UserService {
     String? birthDate,
   }) async {
     const String url =
-        'https://6c86-2409-40e2-100b-8e4b-98b6-82bf-7321-283a.ngrok-free.app/api/users/updateUser'; // Replace with your endpoint URL
+        'https://1823-2409-40e2-17-14f9-147c-562-de01-b02c.ngrok-free.app/api/users/updateUser'; // Replace with your endpoint URL
 
     Map<String, String> headers = {"Content-Type": "application/json"};
 
@@ -24,7 +24,7 @@ class UserService {
     };
 
     try {
-      // Make the POST request to update user information
+      // Make the PUT request to update user information
       final response = await http.put(
         Uri.parse(url),
         headers: headers,
@@ -35,7 +35,8 @@ class UserService {
       if (response.statusCode == 200) {
         return json.decode(response.body);
       } else {
-        print('Failed to update user information');
+        print(
+            'Failed to update user information. Status code: ${response.statusCode}');
         return null;
       }
     } catch (e) {

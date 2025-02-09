@@ -1,7 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:coachui/screens/profile/profileaccountinfo.dart';
 import 'package:coachui/screens/onboardingpages/onboarding.dart'; // Import your onboarding page
-import 'package:coachui/screens/batchpages/batchcurrent.dart';
+import 'package:coachui/screens/batchpages/batchcurrent.dart'; // Import the getuser.dart file for the getUser function
+import 'package:firebase_auth/firebase_auth.dart';
+//import 'package:coachui/apifolder/getuser.dart';
+import 'package:coachui/apifolder/getuser.dart';
+import 'package:intl/intl.dart';
 
 class ProfilePage extends StatefulWidget {
   @override
@@ -9,10 +13,54 @@ class ProfilePage extends StatefulWidget {
 }
 
 class _ProfilePageState extends State<ProfilePage> {
-  String name = "John Doe";
-  String weight = "70 kg";
-  String dob = "01/01/1990";
-  String height = "175 cm";
+  String name = "Loading..."; // Default value
+  String weight = "Loading..."; 
+  String dob = "Loading...";
+  String height = "Loading...";
+  String? firebaseUid;
+
+  @override
+  void initState() {
+    super.initState();
+    _getFirebaseUid(); // Fetch the firebaseUid and user data
+  }
+
+  // Get the current logged-in user's firebaseUid and fetch user data
+  void _getFirebaseUid() async {
+    try {
+      User? firebaseUser = FirebaseAuth.instance.currentUser;
+      if (firebaseUser != null) {
+        setState(() {
+          firebaseUid = firebaseUser.uid; // Set firebaseUid
+        });
+        _fetchUserData(firebaseUid!); // Fetch user data
+      }
+    } catch (e) {
+      print('Error fetching firebaseUid: $e');
+    }
+  }
+
+  // Fetch user data using the getUser function from the getuser.dart file
+  void _fetchUserData(String firebaseUid) async {
+    var data = await UserService.getUser(firebaseUid);  // Call getUser from getuser.dart
+    if (data != null) {
+      setState(() {
+        name = data['name'] ?? 'John Doe';
+        weight = data['weight']?.toString() ?? 'Not Available';
+        dob = data['birthDate'] != null
+            ? DateFormat('MMM yyyy').format(DateTime.parse(data['birthDate'])) // Format DOB to Month and Year
+            : 'Not Available';
+        height = data['height']?.toString() ?? 'Not Available';
+      });
+    } else {
+      print('Failed to fetch user data.');
+    }
+  }
+
+  String _getInitials(String name) {
+    final names = name.split(' ');
+    return names.map((n) => n[0]).take(2).join().toUpperCase(); // Get initials
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -108,15 +156,18 @@ class _ProfilePageState extends State<ProfilePage> {
               children: [
                 ContainerWidget(
                   imagePath: 'assets/u5.png',
-                  labelText: 'Weight ',
+                  labelText: 'Weight',
+                  data: weight,
                 ),
                 ContainerWidget(
                   imagePath: 'assets/u6.png',
                   labelText: 'Height',
+                  data: height,
                 ),
                 ContainerWidget(
                   imagePath: 'assets/u7.png',
                   labelText: 'Birthday',
+                  data: dob,
                 ),
               ],
             ),
@@ -158,7 +209,7 @@ class _ProfilePageState extends State<ProfilePage> {
                       name = updatedData['name'];
                       weight = updatedData['weight'];
                       dob = updatedData['dob'];
-                      height = updatedData['email'];
+                      height = updatedData['height'];
                     });
                   }
                 },
@@ -173,11 +224,10 @@ class _ProfilePageState extends State<ProfilePage> {
               text: 'Batch',
               icon: Icons.arrow_forward_ios,
               onTap: () {
-                // Specify your navigation page here
                 Navigator.push(
                   context,
                   MaterialPageRoute(
-                    builder: (context) => MyBatchPage(), // Replace BatchPage with the desired page
+                    builder: (context) => MyBatchPage(),
                   ),
                 );
               },
@@ -193,17 +243,12 @@ class _ProfilePageState extends State<ProfilePage> {
             ContainerOption(
               text: 'Log Out',
               icon: null,
-              onTap: _showLogoutDialog, // Add onTap callback
+              onTap: _showLogoutDialog,
             ),
           ],
         ),
       ),
     );
-  }
-
-  String _getInitials(String name) {
-    final names = name.split(' ');
-    return names.map((n) => n[0]).take(2).join().toUpperCase(); // Get initials
   }
 
   void _showLogoutDialog() {
@@ -216,14 +261,14 @@ class _ProfilePageState extends State<ProfilePage> {
           actions: [
             TextButton(
               onPressed: () {
-                Navigator.of(context).pop(); // Close the dialog
+                Navigator.of(context).pop();
               },
               child: Text('No'),
             ),
             TextButton(
               onPressed: () {
                 Navigator.of(context).pushReplacement(
-                  MaterialPageRoute(builder: (context) => OnboardingPage()), // Navigate to Onboarding page
+                  MaterialPageRoute(builder: (context) => OnboardingPage()),
                 );
               },
               child: Text('Yes'),
@@ -238,8 +283,9 @@ class _ProfilePageState extends State<ProfilePage> {
 class ContainerWidget extends StatelessWidget {
   final String imagePath;
   final String labelText;
+  final String data;
 
-  ContainerWidget({required this.imagePath, required this.labelText});
+  ContainerWidget({required this.imagePath, required this.labelText, required this.data});
 
   @override
   Widget build(BuildContext context) {
@@ -276,6 +322,14 @@ class ContainerWidget extends StatelessWidget {
                 fontWeight: FontWeight.bold,
               ),
             ),
+            SizedBox(height: 5),
+            Text(
+              data,
+              style: TextStyle(
+                fontSize: 14,
+                color: Colors.black.withOpacity(0.7),
+              ),
+            ),
           ],
         ),
       ),
@@ -286,24 +340,14 @@ class ContainerWidget extends StatelessWidget {
 class ContainerOption extends StatelessWidget {
   final String text;
   final IconData? icon;
-  final bool? switchWidget;
-  final bool? switchValue;
-  final Function(bool)? onSwitchChanged;
-  final Function()? onTap; // Add onTap callback
+  final Function()? onTap;
 
-  ContainerOption({
-    required this.text,
-    this.icon,
-    this.switchWidget,
-    this.switchValue,
-    this.onSwitchChanged,
-    this.onTap,
-  });
+  ContainerOption({required this.text, this.icon, this.onTap});
 
   @override
   Widget build(BuildContext context) {
     return GestureDetector(
-      onTap: onTap, // Use the onTap callback
+      onTap: onTap,
       child: Container(
         margin: const EdgeInsets.symmetric(vertical: 5, horizontal: 20),
         padding: const EdgeInsets.symmetric(vertical: 15, horizontal: 10),
@@ -329,12 +373,7 @@ class ContainerOption extends StatelessWidget {
                 fontWeight: FontWeight.bold,
               ),
             ),
-            if (switchWidget != null && switchWidget!)
-              Switch(
-                value: switchValue ?? false,
-                onChanged: onSwitchChanged,
-              ),
-            if (icon != null && !(switchWidget ?? false))
+            if (icon != null)
               Icon(
                 icon,
                 color: Colors.grey,

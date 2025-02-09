@@ -1,4 +1,9 @@
+import 'dart:convert';
 import 'package:flutter/material.dart';
+import 'package:coachui/apifolder/UserService.dart';  // Import UserService
+import 'package:firebase_auth/firebase_auth.dart';  // Import FirebaseAuth to get firebaseUid
+import 'package:flutter/services.dart';  // For TextInputFormatter
+import 'package:intl/intl.dart';  // For DateFormat
 
 class ProfileScreen extends StatefulWidget {
   final String name;
@@ -22,6 +27,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
   late TextEditingController _weightController;
   late TextEditingController _dobController;
   late TextEditingController _heightController;
+  String? firebaseUid;
 
   @override
   void initState() {
@@ -30,27 +36,97 @@ class _ProfileScreenState extends State<ProfileScreen> {
     _weightController = TextEditingController(text: widget.weight);
     _dobController = TextEditingController(text: widget.dob);
     _heightController = TextEditingController(text: widget.height);
+    _getFirebaseUid(); // Fetch the firebaseUid
   }
 
-  void _saveProfile() {
-    // Implement the save functionality here
-    // For now, we'll just print the values to the console
-    print("Name: ${_nameController.text}");
-    print("Weight: ${_weightController.text}");
-    print("Date of Birth: ${_dobController.text}");
-    print("Email: ${_heightController.text}");
+  // Get the current logged-in user's firebaseUid
+  void _getFirebaseUid() async {
+    try {
+      User? firebaseUser = FirebaseAuth.instance.currentUser;
+      if (firebaseUser != null) {
+        setState(() {
+          firebaseUid = firebaseUser.uid; // Set firebaseUid
+        });
+      }
+    } catch (e) {
+      print('Error fetching firebaseUid: $e');
+    }
+  }
+
+  void _saveProfile() async {
+    // Ensure firebaseUid is available
+    if (firebaseUid == null) {
+      print('Firebase UID not found');
+      return;
+    }
+
+    // Get updated values from controllers
+    String name = _nameController.text;
+    String weight = _weightController.text;
+    String height = _heightController.text;
+    String dob = _dobController.text;
+
+    // Validate weight and height to make sure they are valid numbers
+    double? parsedWeight = double.tryParse(weight);
+    double? parsedHeight = double.tryParse(height);
+
+    // Validate date of birth (ensure it's in valid format)
+    DateTime? parsedDob = DateTime.tryParse(dob);
     
-    Navigator.pop(context, {
-      'name': _nameController.text,
-      'weight': _weightController.text,
-      'dob': _dobController.text,
-      'email': _heightController.text,
-    });
+    if (parsedWeight == null || parsedHeight == null || parsedDob == null) {
+      // If any of the fields are invalid, show an error
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Please enter valid values for weight, height, and birth date.')),
+      );
+      return;
+    }
+
+    // Call UserService to update user information
+    var result = await UserService.updateUserInfo(
+      firebaseUid: firebaseUid!,
+      name: name,
+      weight: parsedWeight,  // Convert to double
+      height: parsedHeight,  // Convert to double
+      birthDate: dob,  // Pass the dob as a string
+    );
+
+    if (result != null) {
+      // Handle success response from the API
+      print("Profile updated successfully: $result");
+
+      // You can return the updated data back to the previous screen
+      Navigator.pop(context, {
+        'name': name,
+        'weight': weight,
+        'dob': dob,
+        'height': height,
+      });
+    } else {
+      // Handle failure response
+      print("Failed to update profile.");
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Failed to update profile.')),
+      );
+    }
   }
 
   String _getInitials(String name) {
     final names = name.split(' ');
     return names.map((n) => n[0]).take(2).join().toUpperCase(); // Get initials from both first and last name
+  }
+
+  Future<void> _selectDate(BuildContext context) async {
+    final DateTime? picked = await showDatePicker(
+      context: context,
+      initialDate: DateTime.now(),
+      firstDate: DateTime(1900),
+      lastDate: DateTime(2101),
+    );
+    if (picked != null && picked != DateTime.now()) {
+      setState(() {
+        _dobController.text = DateFormat('yyyy-MM-dd').format(picked);
+      });
+    }
   }
 
   @override
@@ -75,7 +151,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
             ),
             Spacer(),
             GestureDetector(
-              onTap: _saveProfile,
+              onTap: _saveProfile, // Trigger _saveProfile when save is tapped
               child: Text(
                 'Save',
                 style: TextStyle(color: Colors.purple, fontSize: 16),
@@ -111,16 +187,21 @@ class _ProfileScreenState extends State<ProfileScreen> {
             ),
             SizedBox(height: 20),
             _buildProfileField("Name", _nameController),
-            _buildProfileField("Weight", _weightController),
-            _buildProfileField("Date of Birth", _dobController),
-            _buildProfileField("Height", _heightController),
+            _buildProfileField("Weight", _weightController, isNumeric: true),
+            _buildProfileField("Height", _heightController, isNumeric: true),
+            _buildProfileField("Date of Birth", _dobController, isDate: true),
           ],
         ),
       ),
     );
   }
 
-  Widget _buildProfileField(String label, TextEditingController controller) {
+  Widget _buildProfileField(
+    String label,
+    TextEditingController controller, {
+    bool isNumeric = false,
+    bool isDate = false,
+  }) {
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 8.0, horizontal: 16.0),
       child: Container(
@@ -139,8 +220,22 @@ class _ProfileScreenState extends State<ProfileScreen> {
               flex: 2,
               child: TextField(
                 controller: controller,
+                keyboardType: isNumeric
+                    ? TextInputType.numberWithOptions(decimal: true)
+                    : isDate
+                        ? TextInputType.datetime
+                        : TextInputType.text,
+                inputFormatters: isNumeric
+                    ? [FilteringTextInputFormatter.digitsOnly]
+                    : [],
+                onTap: isDate
+                    ? () => _selectDate(context)
+                    : null, // Show date picker when tapping the DOB field
                 decoration: InputDecoration(
                   border: InputBorder.none,
+                  suffixIcon: isDate
+                      ? Icon(Icons.calendar_today, color: Colors.grey)
+                      : null,
                 ),
               ),
             ),

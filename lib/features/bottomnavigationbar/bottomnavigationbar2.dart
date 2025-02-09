@@ -52,7 +52,7 @@ class _NavigationState2 extends State<Navigation2> {
     return [
       DashboardScreen(),
       PaymentHistoryPage(),
-      BatchListPage(),
+      ManagePage(),
       ProfilePage()
     ];
   }

@@ -27,21 +27,21 @@ class NotificationScreen extends StatelessWidget {
             children: [
               NotificationDateHeader(date: '10, July, 2024'),
               NotificationItem(
-                imageAsset: 'assets/images/notification_image.png',
+                imageAsset: 'assets/u8.png',
                 message: 'Fee Due',
               ),
               NotificationItem(
-                imageAsset: 'assets/images/notification_image.png',
+                imageAsset: 'assets/u8.png',
                 message: 'Attendance Marked',
               ),
               SizedBox(height: 16),
               NotificationDateHeader(date: '1, July, 2024'),
               NotificationItem(
-                imageAsset: 'assets/images/notification_image.png',
+                imageAsset: 'assets/u8.png',
                 message: 'You have a match tomorrow!',
               ),
               NotificationItem(
-                imageAsset: 'assets/images/notification_image.png',
+                imageAsset: 'assets/u8.png',
                 message: 'Welcome!',
               ),
             ],

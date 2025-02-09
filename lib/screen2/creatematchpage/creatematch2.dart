@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-
+import 'package:coachui/screen2/creatematchpage/selecteam1.dart';
 class CreateMatch2Page extends StatefulWidget {
   @override
   _CreateMatch2PageState createState() => _CreateMatch2PageState();
@@ -14,6 +14,23 @@ class _CreateMatch2PageState extends State<CreateMatch2Page> {
 
   final List<String> teams = ["Team A", "Team B", "Team C", "Team D"];
   final List<String> venues = ["Ground 1", "Ground 2", "Ground 3"];
+
+  void _resetFields() {
+    setState(() {
+      selectedTeam1 = "Choose Team";
+      selectedTeam2 = "Choose Team";
+      selectedVenue = "Select Ground";
+      selectedTime = TimeOfDay(hour: 10, minute: 0);
+      selectedMatchType = "Friendly";
+    });
+  }
+
+  void _navigateToNextPage() {
+    Navigator.push(
+      context,
+      MaterialPageRoute(builder: (context) => SelectTeam1Page()), // Replace `NextPage` with your page widget
+    );
+  }
 
   void _selectTeam(String teamType) async {
     String? selected = await showDialog(
@@ -115,7 +132,9 @@ class _CreateMatch2PageState extends State<CreateMatch2Page> {
         elevation: 0,
         leading: IconButton(
           icon: Icon(Icons.arrow_back, color: Colors.black),
-          onPressed: () {},
+          onPressed: () {
+            Navigator.pop(context);
+          },
         ),
         title: Text(
           "Create Match",
@@ -142,8 +161,8 @@ class _CreateMatch2PageState extends State<CreateMatch2Page> {
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceEvenly,
               children: [
-                _buildButton("Discard", Colors.white, Colors.purple, () {}),
-                _buildButton("Save", Colors.purple, Colors.white, () {}),
+                _buildButton("Discard", Colors.white, const Color(0xFF512DA8), _resetFields),
+                _buildButton("Save", const Color(0xFF512DA8), Colors.white, _navigateToNextPage),
               ],
             ),
           ],
@@ -195,7 +214,7 @@ class _CreateMatch2PageState extends State<CreateMatch2Page> {
       style: ElevatedButton.styleFrom(
         backgroundColor: bgColor,
         minimumSize: Size(150, 50),
-        side: BorderSide(color: Colors.purple),
+        side: BorderSide(color: const Color(0xFF512DA8)),
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(32)),
       ),
       child: Text(
@@ -205,3 +224,5 @@ class _CreateMatch2PageState extends State<CreateMatch2Page> {
     );
   }
 }
+
+

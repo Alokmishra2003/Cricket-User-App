@@ -1,22 +1,23 @@
 import 'package:flutter/material.dart';
-
+import 'package:coachui/screen2/recentapplication/recentapplicationdat.dart';
 class RecentApplicationEdit1 extends StatelessWidget {
   final List<Map<String, String>> users = [
     {
-      'name': 'User One',
-      'batch': 'Batch One',
-      'date': '24th August, 2024',
-      'email': 'email1@example.com',
-      'phone': '+91 234 567 890',
+      'name': 'Abhishek Singh',
+      'batch': 'U-19',
+      'date': 'Aug 24, 2022',
+      'email': 'abhishek@gmail.com',
+      'phone': '+91 91202112210',
+      'status': 'ACTIVE',
     },
     {
-      'name': 'User Two',
-      'batch': 'Batch Two',
-      'date': '25th August, 2024',
-      'email': 'email2@example.com',
-      'phone': '+91 345 678 901',
+      'name': 'Avish Yadav',
+      'batch': 'U-23',
+      'date': 'Apr 12, 2020',
+      'email': 'triston.bode@example.com',
+      'phone': '(444) 342-763',
+      'status': 'ENQUIRY',
     },
-    // Add more users as needed
   ];
 
   @override
@@ -28,12 +29,12 @@ class RecentApplicationEdit1 extends StatelessWidget {
         leading: IconButton(
           icon: Icon(Icons.arrow_back),
           onPressed: () {
-            Navigator.of(context).pop(); // Back navigation
+            Navigator.of(context).pop();
           },
         ),
         title: Center(
           child: Text(
-            'Recent Application',
+            'Recent Applications',
             style: TextStyle(
               fontSize: 18,
               fontWeight: FontWeight.bold,
@@ -48,7 +49,10 @@ class RecentApplicationEdit1 extends StatelessWidget {
         child: Padding(
           padding: const EdgeInsets.all(16.0),
           child: Column(
-            children: users.map((user) => UserContainer(user: user, screenWidth: screenWidth)).toList(),
+            children: users
+                .map((user) =>
+                    UserContainer(user: user, screenWidth: screenWidth))
+                .toList(),
           ),
         ),
       ),
@@ -56,112 +60,151 @@ class RecentApplicationEdit1 extends StatelessWidget {
   }
 }
 
-class UserContainer extends StatelessWidget {
+class UserContainer extends StatefulWidget {
   final Map<String, String> user;
   final double screenWidth;
 
   UserContainer({required this.user, required this.screenWidth});
 
   @override
+  _UserContainerState createState() => _UserContainerState();
+}
+
+class _UserContainerState extends State<UserContainer> {
+  late String status;
+  bool isApproved = false; // Track if "Approve" button has been clicked
+
+  @override
+  void initState() {
+    super.initState();
+    status = widget.user['status']!;
+  }
+
+  void toggleStatus() {
+    setState(() {
+      status = status == 'ACTIVE' ? 'ENQUIRY' : 'ACTIVE';
+    });
+  }
+
+  void approveApplication() {
+    setState(() {
+      isApproved = true;
+    });
+  }
+
+  @override
   Widget build(BuildContext context) {
     return Container(
-      width: screenWidth * 0.9,
+      width: widget.screenWidth,
       padding: EdgeInsets.all(16.0),
       decoration: BoxDecoration(
-        color: Colors.grey[200],
+        color: Colors.white,
         borderRadius: BorderRadius.circular(10),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.grey.withOpacity(0.2),
+            spreadRadius: 2,
+            blurRadius: 5,
+            offset: Offset(0, 3),
+          ),
+        ],
       ),
       margin: EdgeInsets.only(bottom: 16.0),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Align(
-            alignment: Alignment.topRight,
-            child: Icon(Icons.more_vert, size: 24.0),
-          ),
-          SizedBox(height: 10),
           Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              CircleAvatar(
-                radius: 30,
-                backgroundImage: AssetImage('assets/avatar.jpg'),
+              Text(
+                widget.user['name'] ?? 'Name Here',
+                style: TextStyle(
+                  fontSize: 16,
+                  fontWeight: FontWeight.bold,
+                  color: Colors.black,
+                ),
               ),
-              SizedBox(width: 10),
-              Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
+              Row(
                 children: [
-                  Text(
-                    user['name'] ?? 'Name Here',
-                    style: TextStyle(
-                      fontSize: 18,
-                      fontWeight: FontWeight.bold,
-                      color: Colors.black,
+                  Container(
+                    padding: EdgeInsets.symmetric(horizontal: 10, vertical: 5),
+                    decoration: BoxDecoration(
+                      color: status == 'ACTIVE'
+                          ? Colors.green[100]
+                          : Colors.blue[100],
+                      borderRadius: BorderRadius.circular(20),
+                    ),
+                    child: Text(
+                      status,
+                      style: TextStyle(
+                        fontSize: 12,
+                        fontWeight: FontWeight.bold,
+                        color: status == 'ACTIVE' ? Colors.green : Colors.blue,
+                      ),
                     ),
                   ),
-                  SizedBox(height: 5),
-                  Text(
-                    user['batch'] ?? 'Batch Text',
-                    style: TextStyle(
-                      fontSize: 14,
-                      color: Colors.grey[700],
-                    ),
+                  PopupMenuButton<String>(
+                    onSelected: (value) {
+                      if (value == 'Toggle Status') {
+                        toggleStatus();
+                      }
+                    },
+                    itemBuilder: (BuildContext context) {
+                      return {'Toggle Status'}.map((String choice) {
+                        return PopupMenuItem<String>(
+                          value: choice,
+                          child: Text(choice),
+                        );
+                      }).toList();
+                    },
+                    icon: Icon(Icons.more_vert),
                   ),
                 ],
               ),
             ],
           ),
           SizedBox(height: 10),
-          Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(
-                'Date of Registration',
-                style: TextStyle(
-                  fontSize: 14,
-                  fontWeight: FontWeight.bold,
-                  color: Colors.grey,
-                ),
-              ),
-              Text(
-                user['date'] ?? 'Date',
-                style: TextStyle(
-                  fontSize: 14,
-                  fontWeight: FontWeight.bold,
-                  color: Colors.black,
-                ),
-              ),
-            ],
+          Text(
+            'Date of Register',
+            style: TextStyle(
+              fontSize: 14,
+              color: Colors.grey,
+            ),
+          ),
+          Text(
+            widget.user['date'] ?? 'Date',
+            style: TextStyle(
+              fontSize: 14,
+              fontWeight: FontWeight.bold,
+              color: Colors.black,
+            ),
           ),
           SizedBox(height: 10),
           Container(
             width: double.infinity,
             padding: EdgeInsets.all(16.0),
             decoration: BoxDecoration(
-              color: Colors.white,
-              borderRadius: BorderRadius.circular(10), // Slightly circular corners
+              color: Colors.grey[100],
+              borderRadius: BorderRadius.circular(10),
             ),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  user['email'] ?? 'email@example.com',
+                  widget.user['email'] ?? 'email@example.com',
                   style: TextStyle(
                     fontSize: 14,
-                    fontWeight: FontWeight.bold,
                     color: Colors.black,
                   ),
                 ),
-                SizedBox(height: 10),
                 Divider(
-                  color: Colors.grey,
+                  color: Colors.grey[400],
                   thickness: 1,
                 ),
-                SizedBox(height: 10),
                 Text(
-                  user['phone'] ?? '+91 234 567 890',
+                  widget.user['phone'] ?? '+91 234 567 890',
                   style: TextStyle(
                     fontSize: 14,
-                    fontWeight: FontWeight.bold,
                     color: Colors.black,
                   ),
                 ),
@@ -169,43 +212,70 @@ class UserContainer extends StatelessWidget {
             ),
           ),
           SizedBox(height: 10),
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-            children: [
-              ElevatedButton(
+          if (!isApproved) // Show "View" and "Approve" buttons
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+              children: [
+                ElevatedButton(
+                  onPressed: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) => RecentApplicationData(), // Specify your page here
+                      ),
+                    );
+                  },
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: Colors.grey[200],
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(20),
+                    ),
+                    padding: EdgeInsets.symmetric(vertical: 12),
+                    minimumSize: Size(widget.screenWidth * 0.4, 0),
+                  ),
+                  child: Text(
+                    'View',
+                    style: TextStyle(color: Colors.black),
+                  ),
+                ),
+                ElevatedButton(
+                  onPressed: approveApplication,
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: Colors.blue,
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(20),
+                    ),
+                    padding: EdgeInsets.symmetric(vertical: 12),
+                    minimumSize: Size(widget.screenWidth * 0.4, 0),
+                  ),
+                  child: Text(
+                    'Approve',
+                    style: TextStyle(color: Colors.white),
+                  ),
+                ),
+              ],
+            )
+          else // Show "Approved" button
+            Center(
+              child: ElevatedButton(
                 onPressed: () {},
                 style: ElevatedButton.styleFrom(
-                  backgroundColor: Color(0xFFB3E5FC), // Ultra-light blue color
+                  backgroundColor: Colors.green,
                   shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(20), // Circular border
+                    borderRadius: BorderRadius.circular(20),
                   ),
                   padding: EdgeInsets.symmetric(vertical: 12),
-                  minimumSize: Size(screenWidth * 0.4, 0), // 40% screen width
+                  minimumSize: Size(widget.screenWidth * 0.8, 0),
                 ),
                 child: Text(
-                  'View',
-                  style: TextStyle(color: Colors.black),
-                ),
-              ),
-              ElevatedButton(
-                onPressed: () {},
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: Color(0xFF1F74EC), // Color code for the Approve button
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(20), // Circular border
-                  ),
-                  padding: EdgeInsets.symmetric(vertical: 12),
-                  minimumSize: Size(screenWidth * 0.4, 0), // 40% screen width
-                ),
-                child: Text(
-                  'Approve',
+                  'Approved',
                   style: TextStyle(color: Colors.white),
                 ),
               ),
-            ],
-          ),
+            ),
         ],
       ),
     );
   }
 }
+

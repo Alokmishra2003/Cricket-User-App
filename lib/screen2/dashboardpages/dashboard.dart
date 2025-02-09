@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:coachui/features/calenderhorizontal/calenderhori.dart';
 import 'package:intl/intl.dart';
+import 'package:coachui/screens/notify/notification.dart';
 
 class DashboardScreen extends StatelessWidget {
   @override
@@ -15,13 +16,34 @@ class DashboardScreen extends StatelessWidget {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: <Widget>[
               SizedBox(height: MediaQuery.of(context).size.height * 0.04),
-              Text(
-                'Hello Coach!',
-                style: TextStyle(
-                  fontSize: 24,
-                  fontWeight: FontWeight.bold,
-                  color: Colors.black,
-                ),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Text(
+                    'Dashboard',
+                    style: TextStyle(
+                      fontSize: 24,
+                      fontWeight: FontWeight.bold,
+                      color: Colors.black,
+                    ),
+                  ),
+                  // Notification icon using Image.asset
+                  GestureDetector(
+                    onTap: () {
+                       Navigator.push(
+                       context,
+                       MaterialPageRoute(
+                       builder: (context) => NotificationScreen(), // Replace with your NotificationPage
+                       ),
+                    );
+                    },
+                    child: Image.asset(
+                      'assets/u4.png',
+                      width: 40,
+                      height: 40,
+                    ),
+                  ),
+                ],
               ),
               SizedBox(height: 8),
               Text(

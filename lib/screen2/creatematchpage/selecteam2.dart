@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:coachui/screen2/creatematchpage/viewall.dart';
 
 class SelectTeam2Page extends StatefulWidget {
   @override
@@ -7,12 +8,35 @@ class SelectTeam2Page extends StatefulWidget {
 
 class _SelectTeam2PageState extends State<SelectTeam2Page> {
   final List<Student> students = [
-  Student("Abhishek Singh", "Batsman", Icons.sports_cricket, false),
-  Student("Avish Yadav", "All-Rounder", Icons.sports, false),
-  Student("Anurag Mishra", "Wicket Keeper Batsman", Icons.sports_tennis, false),
-  Student("Sami", "Fast Bowler", Icons.sports_baseball, false),
-];
+    Student("Abhishek Singh", "Batsman", "assets/u11.png", false),
+    Student("Avish Yadav", "All-Rounder", "assets/u11.png", false),
+    Student("Anurag Mishra", "Wicket Keeper Batsman", "assets/u12.png", false),
+    Student("Sami", "Fast Bowler", "assets/u13.png", false),
+  ];
 
+  void resetPage() {
+    setState(() {
+      for (var student in students) {
+        student.isSelected = false;
+      }
+    });
+  }
+
+  void navigateToNextPage() {
+    if (students.any((student) => student.isSelected)) {
+      Navigator.push(
+        context,
+        MaterialPageRoute(builder: (context) => MatchViewScreen()),
+      );
+    } else {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text("Please select at least one student."),
+          backgroundColor: Colors.red,
+        ),
+      );
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -22,7 +46,7 @@ class _SelectTeam2PageState extends State<SelectTeam2Page> {
         elevation: 0,
         leading: IconButton(
           icon: Icon(Icons.arrow_back, color: Colors.black),
-          onPressed: () {},
+          onPressed: () => Navigator.pop(context),
         ),
         title: Text(
           "Create Match",
@@ -35,7 +59,7 @@ class _SelectTeam2PageState extends State<SelectTeam2Page> {
           Padding(
             padding: const EdgeInsets.all(16.0),
             child: Text(
-              "Select Team 1",
+              "Select Team 2",
               style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
             ),
           ),
@@ -53,8 +77,8 @@ class _SelectTeam2PageState extends State<SelectTeam2Page> {
             child: Row(
               mainAxisAlignment: MainAxisAlignment.spaceEvenly,
               children: [
-                _buildButton("Discard", Colors.white, Colors.purple, () {}),
-                _buildButton("Save", Colors.purple, Colors.white, () {}),
+                _buildButton("Discard", Colors.white, const Color(0xFF512DA8), resetPage),
+                _buildButton("Save", const Color(0xFF512DA8), Colors.white, navigateToNextPage),
               ],
             ),
           ),
@@ -93,7 +117,7 @@ class _SelectTeam2PageState extends State<SelectTeam2Page> {
                   student.isSelected = value!;
                 });
               },
-              activeColor: Colors.purple,
+              activeColor: const Color(0xFF512DA8),
             ),
             Expanded(
               child: Column(
@@ -116,10 +140,11 @@ class _SelectTeam2PageState extends State<SelectTeam2Page> {
                 ],
               ),
             ),
-            Icon(
-              student.icon,
-              color: Colors.purple,
-              size: 30.0,
+            Image.asset(
+              student.imagePath,
+              width: 40,
+              height: 40,
+              fit: BoxFit.cover,
             ),
           ],
         ),
@@ -133,8 +158,8 @@ class _SelectTeam2PageState extends State<SelectTeam2Page> {
       style: ElevatedButton.styleFrom(
         backgroundColor: bgColor,
         minimumSize: Size(150, 50),
-        side: BorderSide(color: Colors.purple),
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+        side: BorderSide(color: const Color(0xFF512DA8)),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(32)),
       ),
       child: Text(
         label,
@@ -147,8 +172,8 @@ class _SelectTeam2PageState extends State<SelectTeam2Page> {
 class Student {
   final String name;
   final String role;
-  final IconData icon;
+  final String imagePath;
   bool isSelected;
 
-  Student(this.name, this.role, this.icon, this.isSelected);
+  Student(this.name, this.role, this.imagePath, this.isSelected);
 }

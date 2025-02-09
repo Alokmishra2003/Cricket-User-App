@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:coachui/screen2/creatematchpage/creatematch2.dart';
+import 'package:coachui/screen2/creatematchpage/viewall.dart';
 
 class CreateMatchPage extends StatelessWidget {
   @override
@@ -49,7 +51,11 @@ class CreateMatchPage extends StatelessWidget {
             // Create Match Container
             GestureDetector(
               onTap: () {
-                // Navigate to Create Match Page
+                // Navigate to the Create Match 2 Page
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (context) => CreateMatch2Page()),
+                );
               },
               child: Container(
                 decoration: BoxDecoration(
@@ -97,6 +103,10 @@ class CreateMatchPage extends StatelessWidget {
             GestureDetector(
               onTap: () {
                 // Navigate to View All Page
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (context) => MatchViewScreen()),
+                );
               },
               child: Container(
                 decoration: BoxDecoration(
